@@ -113,6 +113,10 @@ export const useVoiceClient = (props: {
     client.current?.sendText(text);
   }, []);
 
+  const sendImage = useCallback((data: string) => {
+    client.current?.sendImage(data);
+  }, []);
+
   return {
     readyState,
     sendAudio,
@@ -120,5 +124,6 @@ export const useVoiceClient = (props: {
     disconnect,
     sendSystemPrompt,
     sendText,
+    sendImage,
   };
 };

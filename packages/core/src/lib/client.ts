@@ -187,6 +187,25 @@ export class VoiceClient {
   }
 
   /**
+   * @name sendImage
+   * @description
+   * Send a base 64 encoded image string to the websocket
+   */
+  sendImage(data: string) {
+    if (!this.socket) {
+      throw new Error('Socket is not connected.');
+    }
+
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      throw new Error('Socket is not open.');
+    }
+
+    const json = JSON.stringify({ data, type: 'image_input' });
+
+    this.socket.send(json);
+  }
+
+  /**
    * @name readyState
    * @description
    * The current ready state of the socket.
