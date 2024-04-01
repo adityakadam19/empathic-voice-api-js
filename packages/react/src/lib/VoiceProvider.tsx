@@ -23,7 +23,7 @@ import React, {
 import { ConnectionMessage } from './connection-message';
 import { noop } from './noop';
 import { useCallDuration } from './useCallDuration';
-import { useEncoding } from './useEncoding';
+import { useMicrophoneStream } from './useMicrophoneStream';
 import { useMessages } from './useMessages';
 import { useMicrophone } from './useMicrophone';
 import { useSoundPlayer } from './useSoundPlayer';
@@ -166,7 +166,11 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     },
   });
 
-  const { streamRef, getStream, permission: micPermission } = useEncoding();
+  const {
+    streamRef,
+    getStream,
+    permission: micPermission,
+  } = useMicrophoneStream();
 
   const client = useVoiceClient({
     onAudioMessage: (message: AudioOutputMessage) => {

@@ -1,15 +1,15 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { describe, expect, it } from 'vitest';
 
-import { useEncoding } from './useEncoding';
+import { useMicrophoneStream } from './useMicrophoneStream';
 
-describe('useEncoding', () => {
+describe('useMicrophoneStream', () => {
   it('is defined', () => {
-    expect(useEncoding).toBeDefined();
+    expect(useMicrophoneStream).toBeDefined();
   });
 
   it('getStream function works correctly', async () => {
-    const { result } = renderHook(() => useEncoding());
+    const { result } = renderHook(() => useMicrophoneStream());
     const permissionStatus = await result.current.getStream();
     expect(['granted', 'denied']).toContain(permissionStatus);
   });

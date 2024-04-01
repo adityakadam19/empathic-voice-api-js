@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 
 type PermissionStatus = 'prompt' | 'granted' | 'denied';
 
-const useEncoding = () => {
+export const useMicrophoneStream = () => {
   const [permission, setPermission] = useState<PermissionStatus>('prompt');
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -31,5 +31,3 @@ const useEncoding = () => {
     permission,
   };
 };
-
-export { useEncoding };
