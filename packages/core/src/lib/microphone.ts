@@ -5,14 +5,42 @@
  * @returns
  * A new MediaStream with audio tracks.
  */
-export const getAudioStream = async (): Promise<MediaStream> => {
+export const getAudioStream = async (
+  inputDevice: MediaDeviceInfo | undefined,
+): Promise<MediaStream> => {
+  const audioOptions: Partial<MediaStreamConstraints['audio']> = {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  };
+
+  if (inputDevice) {
+    audioOptions.deviceId = {
+      exact: inputDevice.deviceId,
+    };
+  }
+
+  console.log('audioOptions', audioOptions);
+
   return navigator.mediaDevices.getUserMedia({
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true,
-    },
+    audio: audioOptions,
     video: false,
+  });
+};
+
+/**
+ * @name getAudioInputDevices
+ * @description
+ * Enumerate all of the user's available audio input devices
+ * @returns
+ * A list of audio input devices
+ */
+export const getAudioInputDevices = async () => {
+  return navigator.mediaDevices.enumerateDevices().then((devices) => {
+    const inputDevices = devices.filter((device) => {
+      return device.kind === 'audioinput';
+    });
+    return inputDevices;
   });
 };
 

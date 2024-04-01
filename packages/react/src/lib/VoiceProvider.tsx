@@ -170,6 +170,9 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     streamRef,
     getStream,
     permission: micPermission,
+    getInputDevices,
+    inputDevices,
+    selectedInputDevice,
   } = useMicrophoneStream();
 
   const client = useVoiceClient({
@@ -368,6 +371,8 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       isMicrophoneError,
       isSocketError,
       callDurationTimestamp,
+      inputDevices,
+      selectedInputDevice,
     ],
   );
 
