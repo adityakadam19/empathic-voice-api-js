@@ -2,11 +2,12 @@
  * @name getAudioStream
  * @description
  * Get a MediaStream with audio tracks.
+ * @param {string} deviceId - The ID of the microphone input device
  * @returns
  * A new MediaStream with audio tracks.
  */
 export const getAudioStream = async (
-  inputDevice: MediaDeviceInfo | undefined,
+  deviceId: string | undefined,
 ): Promise<MediaStream> => {
   const audioOptions: Partial<MediaStreamConstraints['audio']> = {
     echoCancellation: true,
@@ -14,13 +15,11 @@ export const getAudioStream = async (
     autoGainControl: true,
   };
 
-  if (inputDevice) {
+  if (deviceId) {
     audioOptions.deviceId = {
-      exact: inputDevice.deviceId,
+      exact: deviceId,
     };
   }
-
-  console.log('audioOptions', audioOptions);
 
   return navigator.mediaDevices.getUserMedia({
     audio: audioOptions,

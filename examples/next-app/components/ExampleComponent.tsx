@@ -60,9 +60,9 @@ export const ExampleComponent = () => {
   useEffect(() => {
     if (!initialMessageSent.current && status.value === 'connected') {
       initialMessageSent.current = true;
-      sendText(
-        'Please greet me as though I were a long lost friend from your childhood',
-      );
+      // sendText(
+      //   'Please greet me as though I were a long lost friend from your childhood',
+      // );
     }
     return () => {
       initialMessageSent.current = false;

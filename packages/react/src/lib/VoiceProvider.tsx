@@ -8,7 +8,7 @@ import {
   UserTranscriptMessage,
   VoiceEventMap,
 } from '@humeai/voice';
-import React, {
+import {
   createContext,
   FC,
   PropsWithChildren,
@@ -28,6 +28,8 @@ import { useMessages } from './useMessages';
 import { useMicrophone } from './useMicrophone';
 import { useSoundPlayer } from './useSoundPlayer';
 import { useVoiceClient, type VoiceReadyState } from './useVoiceClient';
+import { useMicrophoneInputDevice } from './useMicrophoneInputDevice';
+import { millisecondsInHour } from 'date-fns/constants';
 
 type VoiceError =
   | { type: 'socket_error'; message: string; error?: Error }
@@ -73,6 +75,9 @@ export type VoiceContextType = {
   isMicrophoneError: boolean;
   isSocketError: boolean;
   callDurationTimestamp: string | null;
+  inputDevices: MediaDeviceInfo[];
+  selectedInputDevice: MediaDeviceInfo | undefined;
+  changeInputDevice: (deviceId: string) => void;
 };
 
 const VoiceContext = createContext<VoiceContextType | null>(null);
@@ -167,12 +172,16 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   });
 
   const {
-    streamRef,
-    getStream,
-    permission: micPermission,
     getInputDevices,
     inputDevices,
     selectedInputDevice,
+    onChangeInputDevice,
+  } = useMicrophoneInputDevice();
+
+  const {
+    streamRef,
+    getStream,
+    permission: micPermission,
   } = useMicrophoneStream();
 
   const client = useVoiceClient({
@@ -233,7 +242,8 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   const connect = useCallback(async () => {
     updateError(null);
     setStatus({ value: 'connecting' });
-    const permission = await getStream();
+    const devices = await getInputDevices();
+    const permission = await getStream(devices?.defaultDevice?.deviceId);
 
     if (permission === 'denied') {
       const error: VoiceError = {
@@ -310,6 +320,16 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     [micPermission, stopTimer, disconnectFromVoice, status.value],
   );
 
+  const changeInputDevice = useCallback(
+    async (deviceId: string) => {
+      mic.stop();
+      void getStream(deviceId).then(() => {
+        mic.start();
+      });
+    },
+    [onChangeInputDevice, mic, getStream],
+  );
+
   useEffect(() => {
     if (
       error !== null &&
@@ -347,6 +367,9 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
         isMicrophoneError,
         isSocketError,
         callDurationTimestamp,
+        inputDevices,
+        selectedInputDevice,
+        changeInputDevice,
       }) satisfies VoiceContextType,
     [
       connect,
@@ -373,6 +396,7 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       callDurationTimestamp,
       inputDevices,
       selectedInputDevice,
+      onChangeInputDevice,
     ],
   );
 
