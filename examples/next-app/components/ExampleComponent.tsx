@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/Select';
 import type { EmotionScores } from '@humeai/voice';
 import { useVoice } from '@humeai/voice-react';
 import { useEffect, useMemo, useRef } from 'react';
@@ -43,6 +50,9 @@ export const ExampleComponent = () => {
     micFft,
     sendText,
     callDurationTimestamp,
+    inputDevices,
+    selectedInputDevice,
+    changeInputDevice,
   } = useVoice();
 
   const initialMessageSent = useRef(false);
@@ -145,6 +155,29 @@ export const ExampleComponent = () => {
                       Mute mic
                     </button>
                   )}
+
+                  <Select
+                    value={selectedInputDevice?.deviceId}
+                    onValueChange={(value: string) => {
+                      changeInputDevice(value);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select mode" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-tan-200">
+                      {inputDevices.map((device) => {
+                        return (
+                          <SelectItem
+                            key={device.deviceId}
+                            value={device.deviceId}
+                          >
+                            {device.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {voiceFftAnimation(normalizedFft)}
