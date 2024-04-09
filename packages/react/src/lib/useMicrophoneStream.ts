@@ -5,6 +5,7 @@ import {
   getAudioStream,
 } from '@humeai/voice';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { debounce } from '../utils';
 
 type PermissionStatus = 'prompt' | 'granted' | 'denied';
 
@@ -55,21 +56,26 @@ export const useMicrophoneStream = () => {
 
   useEffect(() => {
     const onDeviceChange = () => {
-      void getInputDevices();
+      console.log('device change');
+      void getInputDevices().then(({ defaultDevice }) => {
+        void getStream(defaultDevice?.deviceId);
+      });
     };
-    navigator.mediaDevices?.addEventListener('devicechange', onDeviceChange);
+    navigator.mediaDevices.ondevicechange = debounce(onDeviceChange, 500);
 
     return () => {
-      navigator.mediaDevices?.removeEventListener(
-        'devicechange',
-        onDeviceChange,
-      );
+      navigator.mediaDevices.ondevicechange = null;
     };
-  }, [getInputDevices]);
+  }, []);
 
   const getStream = useCallback(async (deviceId: string | undefined) => {
     try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
       const stream = await getAudioStream(deviceId);
+      console.log('GETTING STREAM', deviceId, stream);
 
       setPermission('granted');
       streamRef.current = stream;

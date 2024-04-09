@@ -170,10 +170,10 @@ export const ExampleComponent = () => {
                     {inputDevices.map((device) => {
                       return (
                         <SelectItem
-                          key={device.deviceId}
-                          value={device.deviceId}
+                          key={device.deviceId || 'unknown'}
+                          value={device.deviceId || 'unknown'}
                         >
-                          {device.label}
+                          {device.label ?? 'unknown'} {device.deviceId ?? '[?]'}
                         </SelectItem>
                       );
                     })}

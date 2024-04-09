@@ -1,15 +1,30 @@
 // cspell:ignore dataavailable
 import type { MimeType } from '@humeai/voice';
-import { getSupportedMimeType } from '@humeai/voice';
+import {
+  checkForAudioTracks,
+  getAudioInputDevices,
+  getAudioStream,
+  getSupportedMimeType,
+} from '@humeai/voice';
 import Meyda from 'meyda';
 import type { MeydaFeaturesObject } from 'meyda';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MutableRefObject } from 'react';
 
 import { generateEmptyFft } from './generateEmptyFft';
+import { debounce } from '../utils';
+
+type PermissionStatus = 'prompt' | 'granted' | 'denied';
+
+function getDefaultDevice(devices: MediaDeviceInfo[]) {
+  const defaultDevice = devices.filter(
+    ({ deviceId }) => deviceId === 'default',
+  )[0];
+  return defaultDevice ?? devices[0];
+}
 
 export type MicrophoneProps = {
-  streamRef: MutableRefObject<MediaStream | null>;
+  // streamRef: MutableRefObject<MediaStream | null>;
   onAudioCaptured: (b: ArrayBuffer) => void;
   onStartRecording?: () => void;
   onStopRecording?: () => void;
@@ -17,7 +32,7 @@ export type MicrophoneProps = {
 };
 
 export const useMicrophone = (props: MicrophoneProps) => {
-  const { streamRef, onAudioCaptured, onError } = props;
+  const { onAudioCaptured, onError } = props;
   const [isMuted, setIsMuted] = useState(false);
   const isMutedRef = useRef(isMuted);
 
@@ -32,6 +47,85 @@ export const useMicrophone = (props: MicrophoneProps) => {
   const sendAudio = useRef(onAudioCaptured);
   sendAudio.current = onAudioCaptured;
 
+  const [permission, setPermission] = useState<PermissionStatus>('prompt');
+
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedInputDevice, setSelectedInputDevice] = useState<
+    MediaDeviceInfo | undefined
+  >();
+  const [defaultInputDevice, setDefaultInputDevice] = useState<
+    MediaDeviceInfo | undefined
+  >();
+
+  const getInputDevices = useCallback(async () => {
+    try {
+      const devices = await getAudioInputDevices();
+      const defaultDevice = getDefaultDevice(devices ?? []);
+      setInputDevices(devices);
+      setSelectedInputDevice(defaultDevice);
+      setDefaultInputDevice(defaultDevice);
+      return { defaultDevice };
+    } catch (e) {
+      return { defaultDevice: null };
+    }
+  }, []);
+
+  const changeInputDevice = useCallback(
+    (id: string) => {
+      const matchingDevice = inputDevices.find(
+        ({ deviceId }) => deviceId === id,
+      );
+      if (matchingDevice) {
+        setSelectedInputDevice(matchingDevice);
+      }
+
+      stop();
+      getStream(id).then(() => {
+        start();
+      });
+    },
+    [inputDevices],
+  );
+
+  useEffect(() => {
+    const onDeviceChange = () => {
+      console.log('device change');
+      void getInputDevices().then(({ defaultDevice }) => {
+        if (defaultDevice) {
+          changeInputDevice(defaultDevice?.deviceId);
+        }
+      });
+    };
+    navigator.mediaDevices.ondevicechange = debounce(onDeviceChange, 500);
+
+    return () => {
+      navigator.mediaDevices.ondevicechange = null;
+    };
+  }, []);
+
+  const getStream = useCallback(async (deviceId: string | undefined) => {
+    try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
+      const stream = await getAudioStream(deviceId);
+      console.log('GETTING STREAM', deviceId, stream);
+
+      setPermission('granted');
+      streamRef.current = stream;
+
+      checkForAudioTracks(stream);
+
+      return 'granted' as const;
+    } catch (e) {
+      setPermission('denied');
+      return 'denied' as const;
+    }
+  }, []);
+
   const dataHandler = useCallback((event: BlobEvent) => {
     if (isMutedRef.current) {
       // Do not send audio if the microphone is muted
@@ -44,6 +138,7 @@ export const useMicrophone = (props: MicrophoneProps) => {
       .arrayBuffer()
       .then((buffer) => {
         if (buffer.byteLength > 0) {
+          console.log(streamRef.current);
           sendAudio.current?.(buffer);
         }
       })
@@ -52,12 +147,7 @@ export const useMicrophone = (props: MicrophoneProps) => {
       });
   }, []);
 
-  const start = useCallback(() => {
-    const stream = streamRef.current;
-    if (!stream) {
-      throw new Error('No stream connected');
-    }
-
+  const startFftAnalyzer = useCallback((stream: MediaStream) => {
     const context = new AudioContext();
     audioContext.current = context;
     const input = context.createMediaStreamSource(stream);
@@ -78,16 +168,28 @@ export const useMicrophone = (props: MicrophoneProps) => {
       const message = e instanceof Error ? e.message : 'Unknown error';
       console.error(`Failed to start mic analyzer: ${message}`);
     }
+  }, []);
+
+  const start = useCallback(() => {
+    const stream = streamRef.current;
+    if (!stream) {
+      throw new Error('No stream connected');
+    }
+
+    startFftAnalyzer(stream);
+
     const mimeType = mimeTypeRef.current;
     if (!mimeType) {
       throw new Error('No MimeType specified');
     }
 
+    console.log('CREATING new recorder');
     recorder.current = new MediaRecorder(stream, {
       mimeType,
     });
     recorder.current.addEventListener('dataavailable', dataHandler);
     recorder.current.start(100);
+    console.log('started recording');
   }, [dataHandler, streamRef, mimeTypeRef]);
 
   const stop = useCallback(() => {
@@ -188,5 +290,14 @@ export const useMicrophone = (props: MicrophoneProps) => {
     unmute,
     isMuted,
     fft,
+    // blah
+    // streamRef,
+    getStream,
+    permission,
+    getInputDevices,
+    inputDevices,
+    selectedInputDevice,
+    changeInputDevice,
+    defaultInputDevice,
   };
 };

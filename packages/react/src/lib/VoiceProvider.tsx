@@ -169,15 +169,15 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     },
   });
 
-  const {
-    streamRef,
-    getStream,
-    permission: micPermission,
-    getInputDevices,
-    inputDevices,
-    selectedInputDevice,
-    onSelectInputDevice,
-  } = useMicrophoneStream();
+  // const {
+  //   streamRef,
+  //   getStream,
+  //   permission: micPermission,
+  //   getInputDevices,
+  //   inputDevices,
+  //   selectedInputDevice,
+  //   onSelectInputDevice,
+  // } = useMicrophoneStream();
 
   const client = useVoiceClient({
     onAudioMessage: (message: AudioOutputMessage) => {
@@ -217,10 +217,9 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   });
 
   const mic = useMicrophone({
-    streamRef,
     onAudioCaptured: useCallback((arrayBuffer) => {
       try {
-        client.sendAudio(arrayBuffer);
+        // client.sendAudio(arrayBuffer);
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';
         updateError({ type: 'socket_error', message });
@@ -233,6 +232,15 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       [updateError],
     ),
   });
+
+  const {
+    getStream,
+    permission: micPermission,
+    getInputDevices,
+    inputDevices,
+    selectedInputDevice,
+    changeInputDevice,
+  } = mic;
 
   const connect = useCallback(async () => {
     updateError(null);
@@ -315,17 +323,6 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     [micPermission, stopTimer, disconnectFromVoice, status.value],
   );
 
-  const changeInputDevice = useCallback(
-    async (deviceId: string) => {
-      onSelectInputDevice(deviceId);
-      mic.stop();
-      void getStream(deviceId).then(() => {
-        mic.start();
-      });
-    },
-    [onSelectInputDevice, mic, getStream],
-  );
-
   useEffect(() => {
     if (
       error !== null &&
@@ -392,7 +389,7 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       callDurationTimestamp,
       inputDevices,
       selectedInputDevice,
-      onSelectInputDevice,
+      changeInputDevice,
     ],
   );
 
