@@ -155,30 +155,30 @@ export const ExampleComponent = () => {
                       Mute mic
                     </button>
                   )}
-
-                  <Select
-                    value={selectedInputDevice?.deviceId}
-                    onValueChange={(value: string) => {
-                      changeInputDevice(value);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select mode" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-tan-200">
-                      {inputDevices.map((device) => {
-                        return (
-                          <SelectItem
-                            key={device.deviceId}
-                            value={device.deviceId}
-                          >
-                            {device.label}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
                 </div>
+
+                <Select
+                  value={selectedInputDevice?.deviceId}
+                  onValueChange={(value: string) => {
+                    changeInputDevice(value);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-tan-200">
+                    {inputDevices.map((device) => {
+                      return (
+                        <SelectItem
+                          key={device.deviceId}
+                          value={device.deviceId}
+                        >
+                          {device.label}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
 
                 {voiceFftAnimation(normalizedFft)}
                 {voiceFftAnimation(normalizedMicFft)}

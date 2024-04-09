@@ -10,7 +10,7 @@ describe('useMicrophoneStream', () => {
 
   it('getStream function works correctly', async () => {
     const { result } = renderHook(() => useMicrophoneStream());
-    const permissionStatus = await result.current.getStream();
+    const permissionStatus = await result.current.getStream('default');
     expect(['granted', 'denied']).toContain(permissionStatus);
   });
 });

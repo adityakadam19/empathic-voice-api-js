@@ -23,13 +23,11 @@ import {
 import { ConnectionMessage } from './connection-message';
 import { noop } from './noop';
 import { useCallDuration } from './useCallDuration';
-import { useMicrophoneStream } from './useMicrophoneStream';
 import { useMessages } from './useMessages';
 import { useMicrophone } from './useMicrophone';
+import { useMicrophoneStream } from './useMicrophoneStream';
 import { useSoundPlayer } from './useSoundPlayer';
 import { useVoiceClient, type VoiceReadyState } from './useVoiceClient';
-import { useMicrophoneInputDevice } from './useMicrophoneInputDevice';
-import { millisecondsInHour } from 'date-fns/constants';
 
 type VoiceError =
   | { type: 'socket_error'; message: string; error?: Error }
@@ -172,16 +170,13 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   });
 
   const {
-    getInputDevices,
-    inputDevices,
-    selectedInputDevice,
-    onChangeInputDevice,
-  } = useMicrophoneInputDevice();
-
-  const {
     streamRef,
     getStream,
     permission: micPermission,
+    getInputDevices,
+    inputDevices,
+    selectedInputDevice,
+    onSelectInputDevice,
   } = useMicrophoneStream();
 
   const client = useVoiceClient({
@@ -322,12 +317,13 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
 
   const changeInputDevice = useCallback(
     async (deviceId: string) => {
+      onSelectInputDevice(deviceId);
       mic.stop();
       void getStream(deviceId).then(() => {
         mic.start();
       });
     },
-    [onChangeInputDevice, mic, getStream],
+    [onSelectInputDevice, mic, getStream],
   );
 
   useEffect(() => {
@@ -396,7 +392,7 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       callDurationTimestamp,
       inputDevices,
       selectedInputDevice,
-      onChangeInputDevice,
+      onSelectInputDevice,
     ],
   );
 
