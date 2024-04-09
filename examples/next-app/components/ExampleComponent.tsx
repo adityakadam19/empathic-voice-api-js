@@ -1,10 +1,11 @@
 'use client';
 
-import { AudioInputSelect } from '@/components/AudioInputSelect';
 import type { EmotionScores } from '@humeai/voice';
 import { useVoice } from '@humeai/voice-react';
 import { useEffect, useMemo, useRef } from 'react';
 import { match } from 'ts-pattern';
+
+import { AudioInputSelect } from '@/components/AudioInputSelect';
 
 function getTop3Expressions(expressionOutputs: EmotionScores) {
   return Object.entries(expressionOutputs)

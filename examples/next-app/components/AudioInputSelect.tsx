@@ -1,3 +1,7 @@
+import type { useVoice } from '@humeai/voice-react';
+import type { FC } from 'react';
+import { memo } from 'react';
+
 import {
   Select,
   SelectContent,
@@ -5,8 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/Select';
-import { useVoice } from '@humeai/voice-react';
-import { FC, memo } from 'react';
 
 type AudioInputSelectProps = {
   inputDevices: ReturnType<typeof useVoice>['inputDevices'];
@@ -26,9 +28,8 @@ export const AudioInputSelect: FC<AudioInputSelectProps> = memo((props) => {
       <SelectTrigger>
         <SelectValue placeholder="Select microphone input" />
       </SelectTrigger>
-      <SelectContent className="bg-tan-200">
+      <SelectContent className="bg-white">
         {inputDevices.map((device) => {
-          console.log('inputDevices', device);
           return (
             <SelectItem
               key={device.deviceId || 'unknown'}
@@ -42,3 +43,5 @@ export const AudioInputSelect: FC<AudioInputSelectProps> = memo((props) => {
     </Select>
   );
 });
+
+AudioInputSelect.displayName = 'AudioInputSelect';
