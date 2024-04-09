@@ -59,9 +59,10 @@ export const useMicrophone = (props: MicrophoneProps) => {
     MediaDeviceInfo | undefined
   >();
 
-  const getInputDevices = useCallback(async () => {
+  const updateInputDeviceList = useCallback(async () => {
     try {
       const devices = await getAudioInputDevices();
+      console.log('GOT LIST OF DEVICES', devices);
       const defaultDevice = getDefaultDevice(devices ?? []);
       setInputDevices(devices);
       setSelectedInputDevice(defaultDevice);
@@ -89,30 +90,30 @@ export const useMicrophone = (props: MicrophoneProps) => {
     [inputDevices],
   );
 
-  useEffect(() => {
-    const onDeviceChange = () => {
-      console.log('device change');
-      void getInputDevices().then(({ defaultDevice }) => {
-        if (defaultDevice) {
-          changeInputDevice(defaultDevice?.deviceId);
-        }
-      });
-    };
-    navigator.mediaDevices.ondevicechange = debounce(onDeviceChange, 500);
+  // useEffect(() => {
+  //   const onDeviceChange = () => {
+  //     console.log('device change');
+  //     void getInputDevices().then(({ defaultDevice }) => {
+  //       if (defaultDevice) {
+  //         changeInputDevice(defaultDevice?.deviceId);
+  //       }
+  //     });
+  //   };
+  //   navigator.mediaDevices.ondevicechange = debounce(onDeviceChange, 500);
 
-    return () => {
-      navigator.mediaDevices.ondevicechange = null;
-    };
-  }, []);
+  //   return () => {
+  //     navigator.mediaDevices.ondevicechange = null;
+  //   };
+  // }, []);
 
-  const getStream = useCallback(async (deviceId: string | undefined) => {
+  const getStream = useCallback(async (deviceId?: string) => {
     try {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       const stream = await getAudioStream(deviceId);
-      console.log('GETTING STREAM', deviceId, stream);
+      console.log('GETTING NEW STREAM', deviceId, stream);
 
       setPermission('granted');
       streamRef.current = stream;
@@ -138,7 +139,6 @@ export const useMicrophone = (props: MicrophoneProps) => {
       .arrayBuffer()
       .then((buffer) => {
         if (buffer.byteLength > 0) {
-          console.log(streamRef.current);
           sendAudio.current?.(buffer);
         }
       })
@@ -290,11 +290,9 @@ export const useMicrophone = (props: MicrophoneProps) => {
     unmute,
     isMuted,
     fft,
-    // blah
-    // streamRef,
     getStream,
     permission,
-    getInputDevices,
+    updateInputDeviceList,
     inputDevices,
     selectedInputDevice,
     changeInputDevice,

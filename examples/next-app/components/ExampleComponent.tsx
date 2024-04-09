@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/Select';
+import { AudioInputSelect } from '@/components/AudioInputSelect';
 import type { EmotionScores } from '@humeai/voice';
 import { useVoice } from '@humeai/voice-react';
 import { useEffect, useMemo, useRef } from 'react';
@@ -157,28 +151,11 @@ export const ExampleComponent = () => {
                   )}
                 </div>
 
-                <Select
-                  value={selectedInputDevice?.deviceId}
-                  onValueChange={(value: string) => {
-                    changeInputDevice(value);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select mode" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-tan-200">
-                    {inputDevices.map((device) => {
-                      return (
-                        <SelectItem
-                          key={device.deviceId || 'unknown'}
-                          value={device.deviceId || 'unknown'}
-                        >
-                          {device.label ?? 'unknown'} {device.deviceId ?? '[?]'}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                <AudioInputSelect
+                  inputDevices={inputDevices}
+                  selectedInputDevice={selectedInputDevice}
+                  changeInputDevice={changeInputDevice}
+                />
 
                 {voiceFftAnimation(normalizedFft)}
                 {voiceFftAnimation(normalizedMicFft)}

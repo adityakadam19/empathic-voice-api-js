@@ -25,7 +25,6 @@ import { noop } from './noop';
 import { useCallDuration } from './useCallDuration';
 import { useMessages } from './useMessages';
 import { useMicrophone } from './useMicrophone';
-import { useMicrophoneStream } from './useMicrophoneStream';
 import { useSoundPlayer } from './useSoundPlayer';
 import { useVoiceClient, type VoiceReadyState } from './useVoiceClient';
 
@@ -169,16 +168,6 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     },
   });
 
-  // const {
-  //   streamRef,
-  //   getStream,
-  //   permission: micPermission,
-  //   getInputDevices,
-  //   inputDevices,
-  //   selectedInputDevice,
-  //   onSelectInputDevice,
-  // } = useMicrophoneStream();
-
   const client = useVoiceClient({
     onAudioMessage: (message: AudioOutputMessage) => {
       player.addToQueue(message);
@@ -236,7 +225,7 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   const {
     getStream,
     permission: micPermission,
-    getInputDevices,
+    updateInputDeviceList,
     inputDevices,
     selectedInputDevice,
     changeInputDevice,
@@ -245,8 +234,9 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   const connect = useCallback(async () => {
     updateError(null);
     setStatus({ value: 'connecting' });
-    const devices = await getInputDevices();
-    const permission = await getStream(devices?.defaultDevice?.deviceId);
+    const permission = await getStream();
+
+    console.log('permission', permission);
 
     if (permission === 'denied') {
       const error: VoiceError = {
@@ -256,6 +246,10 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       updateError(error);
       return Promise.reject(error);
     }
+
+    // In Safari, you must call `enumerateDevices` AFTER the stream is created,
+    // otherwise the device list will be empty.
+    await updateInputDeviceList();
 
     const err = await client
       .connect({
