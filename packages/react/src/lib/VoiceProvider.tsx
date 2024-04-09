@@ -234,7 +234,10 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
   const connect = useCallback(async () => {
     updateError(null);
     setStatus({ value: 'connecting' });
-    const permission = await getStream();
+    // Enumerate devices before requesting permission so that we get a stream with a specific device ID.
+    // This prevents Firefox from allowing the user to choose a device in the native permissions alert.
+    const devices = await updateInputDeviceList();
+    const permission = await getStream(devices.defaultDevice?.deviceId);
 
     console.log('permission', permission);
 
@@ -247,8 +250,8 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       return Promise.reject(error);
     }
 
-    // In Safari, you must call `enumerateDevices` AFTER the stream is created,
-    // otherwise the device list will be empty.
+    // In Safari, you must also call `enumerateDevices` AFTER the stream permissions are granted,
+    // otherwise the initial device list will be empty.
     await updateInputDeviceList();
 
     const err = await client

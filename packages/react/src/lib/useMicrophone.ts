@@ -184,6 +184,7 @@ export const useMicrophone = (props: MicrophoneProps) => {
     }
 
     console.log('CREATING new recorder');
+
     recorder.current = new MediaRecorder(stream, {
       mimeType,
     });
