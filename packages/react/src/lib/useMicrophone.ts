@@ -9,10 +9,8 @@ import {
 import Meyda from 'meyda';
 import type { MeydaFeaturesObject } from 'meyda';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { MutableRefObject } from 'react';
 
 import { generateEmptyFft } from './generateEmptyFft';
-import { debounce } from '../utils';
 
 type PermissionStatus = 'prompt' | 'granted' | 'denied';
 
@@ -73,23 +71,6 @@ export const useMicrophone = (props: MicrophoneProps) => {
     }
   }, []);
 
-  const changeInputDevice = useCallback(
-    (id: string) => {
-      const matchingDevice = inputDevices.find(
-        ({ deviceId }) => deviceId === id,
-      );
-      if (matchingDevice) {
-        setSelectedInputDevice(matchingDevice);
-      }
-
-      stop();
-      getStream(id).then(() => {
-        start();
-      });
-    },
-    [inputDevices],
-  );
-
   // useEffect(() => {
   //   const onDeviceChange = () => {
   //     console.log('device change');
@@ -139,6 +120,7 @@ export const useMicrophone = (props: MicrophoneProps) => {
       .arrayBuffer()
       .then((buffer) => {
         if (buffer.byteLength > 0) {
+          // console.log('audio', buffer.byteLength);
           sendAudio.current?.(buffer);
         }
       })
@@ -148,25 +130,35 @@ export const useMicrophone = (props: MicrophoneProps) => {
   }, []);
 
   const startFftAnalyzer = useCallback((stream: MediaStream) => {
-    const context = new AudioContext();
-    audioContext.current = context;
-    const input = context.createMediaStreamSource(stream);
+    if (!audioContext.current) {
+      audioContext.current = new AudioContext();
+    }
 
-    try {
-      currentAnalyzer.current = Meyda.createMeydaAnalyzer({
-        audioContext: context,
-        source: input,
-        featureExtractors: ['loudness'],
-        callback: (features: MeydaFeaturesObject) => {
-          const newFft = features.loudness.specific || [];
-          setFft(() => Array.from(newFft));
-        },
-      });
+    const input = audioContext.current.createMediaStreamSource(stream);
 
+    if (currentAnalyzer.current) {
+      currentAnalyzer.current.setSource(input);
       currentAnalyzer.current.start();
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Unknown error';
-      console.error(`Failed to start mic analyzer: ${message}`);
+    } else {
+      try {
+        currentAnalyzer.current = Meyda.createMeydaAnalyzer({
+          audioContext: audioContext.current,
+          source: input,
+          featureExtractors: ['loudness'],
+          callback: (features: MeydaFeaturesObject) => {
+            console.log('got new features', features);
+            const newFft = features.loudness.specific || [];
+            setFft(() => Array.from(newFft));
+          },
+        });
+
+        console.log('starting analyzer on', stream);
+
+        currentAnalyzer.current.start();
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        console.error(`Failed to start mic analyzer: ${message}`);
+      }
     }
   }, []);
 
@@ -191,27 +183,24 @@ export const useMicrophone = (props: MicrophoneProps) => {
     recorder.current.addEventListener('dataavailable', dataHandler);
     recorder.current.start(100);
     console.log('started recording');
-  }, [dataHandler, streamRef, mimeTypeRef]);
+  }, [dataHandler, streamRef, mimeTypeRef, startFftAnalyzer]);
 
   const stop = useCallback(() => {
     try {
       if (currentAnalyzer.current) {
         currentAnalyzer.current.stop();
-        currentAnalyzer.current = null;
       }
 
       if (audioContext.current) {
-        void audioContext.current
-          .close()
-          .then(() => {
-            audioContext.current = null;
-          })
-          .catch(() => {
-            // .close() rejects if the audio context is already closed.
-            // Therefore, we just need to catch the error, but we don't need to
-            // do anything with it.
-            return null;
-          });
+        // Suspend the audio context instead of stopping it. We want
+        // to keep the audio context alive so that Safari doesn't
+        // throw an error when the microphone stream changes.
+        void audioContext.current.suspend().catch(() => {
+          // .close() rejects if the audio context is already closed.
+          // Therefore, we just need to catch the error, but we don't need to
+          // do anything with it.
+          return null;
+        });
       }
 
       recorder.current?.stop();
@@ -254,6 +243,23 @@ export const useMicrophone = (props: MicrophoneProps) => {
     isMutedRef.current = false;
     setIsMuted(false);
   }, [streamRef]);
+
+  const changeInputDevice = useCallback(
+    (id: string) => {
+      const matchingDevice = inputDevices.find(
+        ({ deviceId }) => deviceId === id,
+      );
+      if (matchingDevice) {
+        setSelectedInputDevice(matchingDevice);
+      }
+
+      stop();
+      void getStream(id).then(() => {
+        start();
+      });
+    },
+    [inputDevices, stop, getStream, start],
+  );
 
   useEffect(() => {
     return () => {

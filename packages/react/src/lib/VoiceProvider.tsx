@@ -237,9 +237,10 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
     // Enumerate devices before requesting permission so that we get a stream with a specific device ID.
     // This prevents Firefox from allowing the user to choose a device in the native permissions alert.
     const devices = await updateInputDeviceList();
-    const permission = await getStream(devices.defaultDevice?.deviceId);
-
-    console.log('permission', permission);
+    // In Safari, default device ID is undefined until stream permissions are established
+    const permission = await getStream(
+      devices.defaultDevice?.deviceId || undefined,
+    );
 
     if (permission === 'denied') {
       const error: VoiceError = {
