@@ -30,7 +30,13 @@ const normalizeFft = (fft: number[]) => {
   });
 };
 
-export const ExampleComponent = () => {
+export const ExampleComponent = ({
+  hostname,
+  setHostname,
+}: {
+  hostname: string;
+  setHostname: (hostname: string) => void;
+}) => {
   const {
     connect,
     disconnect,
@@ -117,6 +123,17 @@ export const ExampleComponent = () => {
     </div>
   );
 
+  const hostnameInput = (
+    <label className="flex gap-2">
+      Hostname
+      <input
+        className="p-2 text-gray-900"
+        value={hostname}
+        onChange={(e) => setHostname(e.target.value)}
+      />
+    </label>
+  );
+
   return (
     <div>
       <div className={'font-light'}>
@@ -125,6 +142,8 @@ export const ExampleComponent = () => {
           {match(status.value)
             .with('connected', () => (
               <>
+                <div>Connected to: {hostname}</div>
+
                 <div className="flex gap-2">
                   <button
                     className="rounded border border-neutral-500 p-2"
@@ -194,14 +213,17 @@ export const ExampleComponent = () => {
               </>
             ))
             .with('disconnected', () => (
-              <button
-                className="rounded border border-neutral-500 p-2"
-                onClick={() => {
-                  void connect();
-                }}
-              >
-                Connect to voice
-              </button>
+              <>
+                {hostnameInput}
+                <button
+                  className="rounded border border-neutral-500 p-2"
+                  onClick={() => {
+                    void connect();
+                  }}
+                >
+                  Connect to voice
+                </button>
+              </>
             ))
             .with('connecting', () => (
               <button
@@ -213,6 +235,7 @@ export const ExampleComponent = () => {
             ))
             .with('error', () => (
               <div className="flex flex-col gap-4">
+                {hostnameInput}
                 <button
                   className="rounded border border-neutral-500 p-2"
                   onClick={() => {
