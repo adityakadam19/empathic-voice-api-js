@@ -34,6 +34,7 @@ export const AudioInputSelect: FC<AudioInputSelectProps> = memo((props) => {
             <SelectItem
               key={device.deviceId || 'unknown'}
               value={device.deviceId || 'unknown'}
+              className="text-gray-900"
             >
               {device.label ?? 'unknown'} {device.deviceId ?? '[?]'}
             </SelectItem>
