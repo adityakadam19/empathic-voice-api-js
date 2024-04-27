@@ -15,13 +15,13 @@ const NoSSR = dynamic(
 
 export default async function Home() {
   const accessToken = await fetchAccessToken({
-    apiKey: process.env.HUME_API_KEY || 'PjvoDvF8nuoNGMmYuDixAm0sOK7EbiJGx33oH5Xx0rzlYADX',
-    clientSecret: process.env.HUME_CLIENT_SECRET || 'wJoAgmCs043gWD9EGyq83hYCl6uOvdBmg3IHms0kdQxHN3tuJJ1IszY4xk0TAtyY',
+    apiKey:'PjvoDvF8nuoNGMmYuDixAm0sOK7EbiJGx33oH5Xx0rzlYADX',
+    clientSecret:'wJoAgmCs043gWD9EGyq83hYCl6uOvdBmg3IHms0kdQxHN3tuJJ1IszY4xk0TAtyY',
   });
 
   return (
     <div className={'p-6'}>
-      <h1 className={'my-4 text-lg font-medium'}>Hume EVI React Example</h1>
+      <h1 className={'my-4 text-lg font-medium'}>AI-Interviewer</h1>
 
       <NoSSR>
         {accessToken ? (

@@ -61,7 +61,7 @@ export const ExampleComponent = () => {
 
   const callDuration = (
     <div>
-      <div className={'text-sm font-medium uppercase'}>Call duration</div>
+      <div className={'text-sm font-medium uppercase'}>Interview Session duration</div>
       <div>{callDurationTimestamp ?? 'n/a'}</div>
     </div>
   );
