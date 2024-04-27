@@ -15,8 +15,8 @@ const NoSSR = dynamic(
 
 export default async function Home() {
   const accessToken = await fetchAccessToken({
-    apiKey: process.env.HUME_API_KEY || '',
-    clientSecret: process.env.HUME_CLIENT_SECRET || '',
+    apiKey: process.env.HUME_API_KEY || 'PjvoDvF8nuoNGMmYuDixAm0sOK7EbiJGx33oH5Xx0rzlYADX',
+    clientSecret: process.env.HUME_CLIENT_SECRET || 'wJoAgmCs043gWD9EGyq83hYCl6uOvdBmg3IHms0kdQxHN3tuJJ1IszY4xk0TAtyY',
   });
 
   return (
