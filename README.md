@@ -1,42 +1,36 @@
-<div align="center">
-  <img src="https://storage.googleapis.com/hume-public-logos/hume/hume-banner.png">
-  <h1>Hume AI EVI Typescript SDK</h1>
-  <p>
-    <strong>Integrate Hume's Empathic Voice Interface in your web application</strong>
-  </p>
-</div>
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting started
+## Getting Started
 
-This repository contains several Typescript SDKs for the Hume Empathic Voice Interface.
+First, run the development server:
 
-EVI API
-* [https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/core](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/core)
-* [https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react)
-
-Embedded Widget
-* [https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/embed-react](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/embed-react)
-* [https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/embed](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/embed)
-
-Aside from the Typescript SDKs, you may visit [our documentation page](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) for guides on how to use the EVI API.
-
-
-## Example applications
-
-* [Next.js example](https://github.com/HumeAI/empathic-voice-api-js/tree/main/examples/next-app)
-* [Embedded widget parent page example](https://github.com/HumeAI/empathic-voice-api-js/tree/main/examples/vite-app-embed)
-
-## Local development
-
-This SDK is developed on Turborepo. To get started with local development, run:
-
-```
-pnpm install
+```bash
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
-This will start the development server for each SDK package, as well as each of the example applications.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Support
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-If you have questions or require assistance pertaining to this package, [reach out to us on Discord](https://hume.ai/discord)!
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
